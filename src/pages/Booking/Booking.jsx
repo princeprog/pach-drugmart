@@ -6,6 +6,7 @@ import "react-calendar/dist/Calendar.css";
 export default function Booking() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedSlot, setSelectedSlot] = useState(null);
+    const [consultationType, setConsultationType] = useState("Online");
 
     const timeSlots = {
         morning: [
@@ -32,37 +33,61 @@ export default function Booking() {
     };
 
     return (
-        <div className="booking px-16">
-            <div className="tagline flex items-center font-mono text-3xl bg-[url('/images/fortagline.jpg')] bg-cover bg-center h-[35rem] mt-8 shadow-[0px_4px_6px_rgba(0,0,0,0.1),0px_1px_10px_rgba(0,0,0,0.1)] relative rounded-xl">
-                <div className="z-0 absolute inset-0 bg-gradient-to-r from-[#155C9C] via-transparent to-transparent opacity-80 rounded-xl"></div>
-                <div>
-                    <h1 className="text-white z-10 relative ml-5">"Contact Your Consultation Today"</h1>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 pt-12">
+            {/* Banner */}
+            <div className="w-[95%] h-[35rem] bg-[url('/images/pachparm.jpg')] bg-[position:25%_68%] bg-[length:110%_auto] relative shadow-lg pl-16 rounded-3xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-[#155C9C] via-transparent to-transparent opacity-80 rounded-3xl"></div>
+                <h1 className="text-white text-5xl font-bold absolute bottom-50 left-11 z-10">Book Your</h1>
+                <h1 className="text-white text-5xl font-bold absolute bottom-38 left-11 z-10">Consultation Today</h1>
+            </div>
+            
+            <div className="bg-white rounded-3xl shadow-xl w-[90%] max-w-5xl p-14 space-y-12 mt-12">
+                <h2 className="text-4xl font-bold text-center text-gray-800">Book Your Appointment</h2>
+                <p className="text-center text-lg text-gray-500">Select a date, time slot, and consultation type for your appointment</p>
+                
+                {/* Consultation Type Selection */}
+                <div className="flex justify-center gap-6">
+                    <button 
+                        className={`px-6 py-3 rounded-lg font-medium transition duration-300 ${consultationType === "Online" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+                        onClick={() => setConsultationType("Online")}
+                    >
+                        Online Consultation
+                    </button>
+                    <button 
+                        className={`px-6 py-3 rounded-lg font-medium transition duration-300 ${consultationType === "Onsite" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"}`}
+                        onClick={() => setConsultationType("Onsite")}
+                    >
+                        Onsite Consultation
+                    </button>
                 </div>
-            </div>
-
-            <div className="flex items-center justify-center relative w-full mt-8">
-                <hr className="flex-grow border-1 border-gray-300"/>
-                <span className="absolute px-4 bg-white text-3xl text-[#213555] font-medium">Contact Form</span>
-                <hr className="flex-grow border-1 border-gray-300" />
-            </div>
                 
                 <div className="flex flex-col md:flex-row justify-between mt-8 gap-12">
-                    {/* Calendar */}
-                    <div className="flex flex-col items-center w-full md:w-1/3 space-y-6">
-                        <div className="text-xl font-medium text-gray-700">Select Date</div>
-                        <div className="bg-gray-100 p-8 rounded-xl shadow-md w-full">
+                    {/* Calendar Section */}
+                    <div className="flex flex-col items-center w-full md:w-1/2 space-y-6">
+                        {/* Title */}
+                        <div className="text-2xl font-semibold text-gray-800">
+                            Select Date
+                        </div>
+
+                        {/* Calendar Container */}
+                        <div className="bg-gradient-to-b from-blue-100 to-blue-50 p-8 rounded-2xl shadow-lg w-full border border-blue-300 transition-all duration-300 hover:shadow-xl">
                             <Calendar
                                 onChange={handleDateChange}
                                 value={selectedDate}
                                 minDate={new Date()}
-                                className="rounded-lg border-none"
+                                className="rounded-lg border-none bg-white shadow-md p-4"
                             />
                         </div>
                     </div>
-                    
-                    {/* Time Slots */}
-                    <div className="flex flex-col w-full md:w-2/3 space-y-8">
-                        <div className="text-xl font-medium text-gray-700">Select Time Slot</div>
+
+                    {/* Time Slots Section */}
+                    <div className="flex flex-col w-full md:w-2/3 space-y-6">
+                        {/* Title */}
+                        <div className="text-2xl font-semibold text-gray-800">
+                            Select Time Slot
+                        </div>
+
+                        {/* Time Slot Buttons */}
                         <div className="grid grid-cols-2 gap-8">
                             {Object.entries(timeSlots).map(([period, slots]) => (
                                 <div key={period} className="flex flex-col w-full space-y-6">
@@ -72,8 +97,12 @@ export default function Booking() {
                                             <button
                                                 key={index}
                                                 onClick={() => handleSlotSelection(slot)}
-                                                className={`w-full py-5 text-lg rounded-lg font-medium transition duration-300 shadow-md 
-                                                    ${selectedSlot === slot ? "bg-blue-600 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-200"}`}
+                                                className={`w-full py-5 text-lg rounded-2xl font-medium transition duration-300 shadow-lg border border-blue-300 
+                                                    ${
+                                                        selectedSlot === slot
+                                                            ? "bg-blue-600 text-white"
+                                                            : "bg-gradient-to-b from-white to-blue-50 text-gray-700 hover:bg-blue-100"
+                                                    }`}
                                             >
                                                 {slot}
                                             </button>
@@ -84,6 +113,7 @@ export default function Booking() {
                         </div>
                     </div>
                 </div>
+
                 
                 {/* Confirm Button */}
                 <div className="flex justify-center mt-10">
@@ -92,5 +122,6 @@ export default function Booking() {
                     </button>
                 </div>
             </div>
+        </div>
     );
 }

@@ -56,14 +56,14 @@ export default function Home() {
                     <div className="max-w-sm rounded overflow-hidden shadow-2xl h-fit transform transition duration-300 hover:scale-105">
                         <img className="w-full" src="./images/On-site Consult.jpg" alt="On-site Consult"/>
                         <div className="px-6 py-4 bg-[#FFFFFF]">
-                            <div className="text-xl mt-4 font-medium text-[#213555]">On-site Consult</div>
+                            <div className="text-xl mt-4 font-medium text-[#213555]">On-site Consultation</div>
                         </div>
                     </div>
 
                     <div className="max-w-sm rounded overflow-hidden shadow-2xl h-fit transform transition duration-300 hover:scale-105">
                         <img className="w-full" src="./images/Online Consul.jpg" alt="Online Consult"/>
                         <div className="px-6 py-4 bg-[#FFFFFF]">
-                            <div className="text-xl mt-4 font-medium text-[#213555]">Online Consult</div>
+                            <div className="text-xl mt-4 font-medium text-[#213555]">Online Consultation</div>
                         </div>
                     </div>
 

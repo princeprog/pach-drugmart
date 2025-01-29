@@ -18,13 +18,13 @@ export default function NavBar() {
     return (
         <div className="nav-bar text-[#181C14]">
             <div className="text-[#181C14]">
-                <div className="contact flex justify-between items-center py-2 px-16 bg-[#E2E0C8] text-[#181C14]">
-                    <div className="social flex space-x-4 text-[#181C14]">
+                <div className="contact flex justify-between items-center py-2 px-16 bg-[#155C9C] text-[#FFFFFF]">
+                    <div className="social flex space-x-4 text-[#FFFFFF]">
                         <FaFacebook className="text-xl"/>
                         <FaSquareInstagram className="text-xl"/>
                         <FaLinkedin className="text-xl"/>
                     </div>
-                    <p className="font-medium font-sans text-[#181C14]">PACH | DRUGMART AND MEDICAL CLINIC</p>
+                    <p className="font-medium font-sans text-[#FFFFFF]">PACH | DRUGMART AND MEDICAL CLINIC</p>
                     <div className="font-medium flex items-center"><BsTelephone/>CALL NOW: 0000 000 0000</div>
                 </div>
                 <div className="nav flex justify-between items-center border-b-1 border-gray-300 px-16 bg-[#FFFFFF]">
