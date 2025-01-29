@@ -44,6 +44,13 @@ export default function NavBar() {
                     <p className="cursor-pointer hover:text-[#32DBBE] transition-colors duration-300 ease-in-out text-white"
                         onClick={()=>navigate("/about")}
                     >ABOUT</p>
+                    <p className="cursor-pointer hover:text-[#32DBBE] transition-colors duration-300 ease-in-out text-white"
+                        onClick={()=>navigate("/booking")}
+                    >BOOK</p>
+                    <p className="cursor-pointer hover:text-[#32DBBE] transition-colors duration-300 ease-in-out text-white"
+                        onClick={()=>navigate("/contact")}
+                    >CONTACT</p>
+                    
                 </div>
             </div>
             <Outlet/>
