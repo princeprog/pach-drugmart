@@ -57,12 +57,19 @@ export default function EditProduct({ setEditProductModal, editSuccessModal, pro
         formDataToSend.append('brandName', formData.brandName);
         formDataToSend.append('dosage', formData.dosage);
         formDataToSend.append('description', formData.description);
-        formDataToSend.append('image', formData.image);
+        if (formData.image) {
+            formDataToSend.append('image', formData.image);
+        }
         formDataToSend.append('price', formData.price);
         formDataToSend.append('quantity', formData.quantity);
         formDataToSend.append('group', formData.group);
         formDataToSend.append('classification', formData.classification);
         formDataToSend.append('categoryId', formData.categoryId);
+    
+        // Log the form data to debug
+        for (let [key, value] of formDataToSend.entries()) {
+            console.log(`${key}: ${value}`);
+        }
     
         try {
             const response = await fetch(`http://localhost:8080/products/update/${product.productId}`, {
@@ -144,14 +151,6 @@ export default function EditProduct({ setEditProductModal, editSuccessModal, pro
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Image</label>
-                        {product.image && (
-                            <img 
-                                src={`http://localhost:8080/images/${product.image}`} 
-                                alt="Current Product" 
-                                className="w-full h-40 object-cover mt-2 mb-4 rounded-lg"
-                            />
-                        )}
                         <input 
                             type="file" 
                             accept="image/*"
