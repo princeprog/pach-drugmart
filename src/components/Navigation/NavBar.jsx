@@ -32,15 +32,17 @@ export default function NavBar() {
                         <img src="/images/Wordmark.2.png" alt="Pach" className="w-[5rem]"/>
                         <input type="text" placeholder="Search for products" className="border-1 h-[3rem] w-full px-4 py-2 rounded-3xl"/>
                     </div>
-                    <div className="flex items-center space-x-4 cursor-pointer text-[#181C14] hover:text-[#5CB338] transition-colors duration-300 ease-in-out" onClick={
-                        () => navigate("/login")
-                    }>
+                    <div className="flex items-center space-x-4 text-[#181C14] transition-colors duration-300 ease-in-out" >
                         <div className="flex items-center mr-12">
                             <MdOutlineLocationOn className="text-2xl"/>
                             <h1 className=" font-medium t"> Yellow Bell, Colon, City of Naga, Cebu</h1>
                         </div>
-                        <CiUser className="text-4xl"/>
-                        <div>
+                        <CiUser className="text-4xl cursor-pointer"  onClick={
+                            () => navigate("/login")
+                        }/>
+                        <div className="cursor-pointer" onClick={
+                            () => navigate("/login")
+                        }>
                             <h2 className="font-bold">Account</h2>
                             <p className="text-xs">Login / Register</p>
                         </div>
