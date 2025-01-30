@@ -7,7 +7,6 @@ import AdminLogin from "./admin pages/login page/AdminLogin";
 import Sidebar from "./components/Navigation/Sidebar";
 import Product from "./admin pages/Product/Product";
 import About from "./pages/About/About";
-import Contact from "./pages/Booking/Contact";
 import Booking from "./pages/Booking/Booking";
 
 
@@ -20,7 +19,6 @@ export default function Routess() {
                 <Route path="register" element={<Register/>}/>
                 <Route path="login" element={<Login/>}/>
                 <Route path="about" element={<About/>}/>
-                <Route path="contact" element={<Contact/>}/>
                 <Route path="booking" element={<Booking/>}/>
             </Route>
             <Route path="/admin/login" element={<AdminLogin/>}/>
