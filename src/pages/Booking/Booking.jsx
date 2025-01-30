@@ -1,36 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AiOutlineCalendar } from "react-icons/ai";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdError } from "react-icons/md";
- 
- 
+import axios from "axios";
+
 function Modal({ message, isOpen, onClose }) {
+    useEffect(() => {
+        if (isOpen) {
+            document.body.classList.add("overflow-hidden");
+        } else {
+            document.body.classList.remove("overflow-hidden");
+        }
+    }, [isOpen]);
+
     if (!isOpen) return null;
- 
+
     return (
-        <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }} backdrop-blur-sm z-50>
-            <div className="bg-white rounded-xl shadow-2xl w-96 p-6 text-center">
-                {/* Success Icon (Green Check) */}
-                {message.includes("successfully") && (
-                    <FaCheckCircle className="text-5xl text-green-500 mx-auto mb-4" />
+        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div className="bg-white rounded-xl shadow-[0_10px_20px_rgba(0,0,0,0.4)] w-96 p-6 text-center">
+                {message.includes("successfully") ? (
+                    <FaCheckCircle className="text-6xl text-green-500 mx-auto mb-4" />
+                ) : (
+                    <MdError className="text-6xl text-red-500 mx-auto mb-4" />
                 )}
- 
-                {/* Error Icon (Red Error) */}
-                {!message.includes("successfully") && (
-                    <MdError className="text-5xl text-red-500 mx-auto mb-4" />
-                )}
- 
-                {/* Title */}
-                <h3 className="text-xl font-semibold mb-4">
+                <h3 className="text-2xl font-bold mb-4">
                     {message.includes("successfully") ? "Success" : "Error"}
                 </h3>
- 
-                {/* Message */}
                 <p className="text-gray-700 mb-6">{message}</p>
- 
-                {/* Close Button */}
                 <button
                     onClick={onClose}
                     className="bg-blue-600 text-white px-6 py-2 rounded-lg transition duration-300 hover:bg-blue-700"
@@ -40,8 +38,8 @@ function Modal({ message, isOpen, onClose }) {
             </div>
         </div>
     );
-}
- 
+}    
+
 export default function Booking() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -57,80 +55,57 @@ export default function Booking() {
     });
     const [modalMessage, setModalMessage] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
- 
+
     const timeSlots = {
-        morning: [
-            "8:00 AM - 9:00 AM",
-            "9:00 AM - 10:00 AM",
-            "10:00 AM - 11:00 AM",
-            "11:00 AM - 12:00 PM",
-        ],
-        afternoon: [
-            "1:00 PM - 2:00 PM",
-            "2:00 PM - 3:00 PM",
-            "3:00 PM - 4:00 PM",
-            "4:00 PM - 5:00 PM",
-        ],
+        morning: ["8:00 AM - 9:00 AM", "9:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM"],
+        afternoon: ["1:00 PM - 2:00 PM", "2:00 PM - 3:00 PM", "3:00 PM - 4:00 PM", "4:00 PM - 5:00 PM"],
     };
- 
+
     const handleDateChange = (date) => {
         setSelectedDate(date);
         setSelectedSlot(null);
     };
- 
+
     const handleSlotSelection = (slot) => {
         setSelectedSlot(slot);
     };
- 
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setContactDetails({ ...contactDetails, [name]: value });
     };
- 
+
     const handleSubmit = (e) => {
         e.preventDefault();
-   
         const phoneValid = /^[0-9]{11}$/.test(contactDetails.phone);
         const emailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(contactDetails.email);
         const suffixValid = /^(Jr|Sr|II|III|IV|V)$/.test(contactDetails.suffix);
-   
-        if (
-            !contactDetails.firstName ||
-            !contactDetails.lastName ||
-            !contactDetails.email ||
-            !contactDetails.phone ||
-            !selectedSlot
-        ) {
+
+        if (!contactDetails.firstName || !contactDetails.lastName || !contactDetails.email || !contactDetails.phone || !selectedSlot) {
             setModalMessage("Please complete all required fields.");
         } else if (!phoneValid) {
-            setModalMessage("Please enter a valid phone number (10 digits).");
+            setModalMessage("Please enter a valid phone number (11 digits).");
         } else if (!emailValid) {
             setModalMessage("Please enter a valid email address.");
         } else if (contactDetails.suffix && !suffixValid) {
             setModalMessage("Please enter a valid suffix (e.g., Jr, Sr, II, III).");
         } else {
-            if (consultationType === "Online") {
-                setModalMessage(
-                    "Your online consultation appointment has successfully been sent. Please wait for email approval and the meeting link."
-                );
-            } else {
-                setModalMessage(
-                    "Your onsite consultation appointment has successfully been sent. Please wait for email approval and further details."
-                );
-            }
+            setModalMessage(
+                consultationType === "Online"
+                    ? "Your online consultation appointment has successfully been sent. Please wait for email approval and the meeting link."
+                    : "Your onsite consultation appointment has successfully been sent. Please wait for email approval and further details."
+            );
         }
         setIsModalOpen(true);
     };
-   
-   
- 
+
     const closeModal = () => {
         setIsModalOpen(false);
         setModalMessage("");
     };
  
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 pt-2 pb-10">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-white pt-2 pb-10">
             {/* Modal */}
            
             <Modal FaCheckCircle message={modalMessage} isOpen={isModalOpen} onClose={closeModal} />
@@ -147,7 +122,7 @@ export default function Booking() {
             </div>
  
             {/* Booking Form */}
-            <div className="bg-[#ffffff] rounded-3xl shadow-2xl w-[90%] max-w-5xl p-14 space-y-12 mt-12">
+            <div className="bg-[#e0e0e0] rounded-3xl shadow-[0px_8px_24px_rgba(0,0,0,0.3)] w-[90%] max-w-5xl p-14 space-y-12 mt-12">
                 <h2 className="text-4xl font-bold text-center text-gray-800">Book Your Appointment</h2>
                 <p className="text-center text-lg text-gray-500">
                     Select a date, time slot, and consultation type for your appointment
@@ -181,7 +156,7 @@ export default function Booking() {
                 <div className="flex flex-col md:flex-row justify-between gap-5">
                     {/* Calendar Section */}
                     <div className="flex flex-col items-center w-full md:w-1/2 space-y-12">
-                        <div className="text-2xl font-semibold text-gray-800">Select Date</div>
+                        <div className="text-2xl font-semibold text-black-300">Select Date</div>
                         <div className="bg-gradient-to-b p-8 rounded-2xl w-full">
                             <Calendar
                                 onChange={handleDateChange}
@@ -206,7 +181,7 @@ export default function Booking() {
                                             <button
                                                 key={index}
                                                 onClick={() => handleSlotSelection(slot)}
-                                                className={`cursor-pointer w-full py-5 text-lg rounded-2xl font-medium transition duration-300 shadow-lg border border-blue-300 ${
+                                                className={`cursor-pointer w-full py-5 text-lg rounded-2xl font-medium transition duration-300 shadow-lg border border-black-300 ${
                                                     selectedSlot === slot
                                                         ? "bg-blue-600 text-white"
                                                         : "bg-gradient-to-b from-white to-blue-50 text-gray-700 hover:bg-blue-100"
@@ -229,7 +204,7 @@ export default function Booking() {
                         <input
                             type="text"
                             name="firstName"
-                            placeholder="First Name"
+                            placeholder="*First Name"
                             value={contactDetails.firstName}
                             onChange={handleInputChange}
                             className="p-4 border rounded-lg w-full"
@@ -237,7 +212,7 @@ export default function Booking() {
                         <input
                             type="text"
                             name="lastName"
-                            placeholder="Last Name"
+                            placeholder="*Last Name"
                             value={contactDetails.lastName}
                             onChange={handleInputChange}
                             className="p-4 border rounded-lg w-full"
@@ -257,13 +232,13 @@ export default function Booking() {
                             value={contactDetails.suffix}
                             onChange={handleInputChange}
                             className="p-4 border rounded-lg w-full"
-                            pattern="^(Jr|Sr|II|III|IV|V)$"  // Limits suffixes to common values
+                            pattern="^(Jr|Sr|II|III|IV|V)$"
                             title="Please enter a valid suffix (e.g., Jr, Sr, II, III)"
                         />
                         <input
                             type="email"
                             name="email"
-                            placeholder="Email"
+                            placeholder="*Email"
                             value={contactDetails.email}
                             onChange={handleInputChange}
                             className="p-4 border rounded-lg w-full"
@@ -271,7 +246,7 @@ export default function Booking() {
                         <input
                             type="text"
                             name="phone"
-                            placeholder="Phone Number"
+                            placeholder="*Phone Number"
                             value={contactDetails.phone}
                             onChange={handleInputChange}
                             className="p-4 border rounded-lg w-full"
