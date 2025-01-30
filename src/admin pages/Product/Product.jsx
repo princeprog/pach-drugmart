@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import AddProduct from './AddProduct';
+import { FaCheckCircle } from "react-icons/fa";
+import EditProduct from './EditProduct';
 
 export default function Product() {
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [products, setProducts] = useState([]);
+    const [productModal, setProductModal] = useState(false);
+    const [editProductModal, setEditProductModal] = useState(false);
+    const [editSuccessModal, setEditSuccessModal] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
 
     useEffect(() => {
         fetch('http://localhost:8080/products/getall')
             .then(res => res.json())
             .then(data => setProducts(data))
             .catch(err => console.log(err));
-    }, []);
+    }, [productModal, editSuccessModal]);
+
+    const handleEditClick = (product) => {
+        setSelectedProduct(product);
+        setEditProductModal(true);
+    };
 
     return (
         <div className="product w-full py-6 px-10 bg-white shadow-lg rounded-lg">
@@ -49,7 +60,12 @@ export default function Product() {
                                 <td className="px-4 py-3 border-b">{product.categories.name}</td>
                                 <td className="px-4 py-3 border-b">{product.classification}</td>
                                 <td className="px-4 py-3 border-b flex justify-center space-x-3">
-                                    <button className="px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition">Edit</button>
+                                    <button 
+                                        className="px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition"
+                                        onClick={() => handleEditClick(product)}
+                                    >
+                                        Edit
+                                    </button>
                                     <button className="px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition">Delete</button>
                                 </td>
                             </tr>
@@ -58,7 +74,48 @@ export default function Product() {
                 </table>
             </div>
 
-            {showAddProduct && <AddProduct setShowAddProduct={setShowAddProduct} />}
+            {showAddProduct && <AddProduct setShowAddProduct={setShowAddProduct} setProductModal={setProductModal}/>}
+            {productModal &&
+                <div className='success-modal fixed inset-0 flex items-center justify-center bg-black/40 z-50'>
+                    <div className='w-1/3 bg-white h-[18rem] shadow-lg p-6 flex flex-col items-center justify-between'>
+                        <div>
+                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4'/>
+                            <h1 className='text-xl font-semibold text-center text-green-600'>SUCCESS</h1>
+                            <p className='text-center mt-4'>"The data has been added successfully! You can now view it in the system."</p>
+                        </div>
+                        <button 
+                            className='w-full px-4 py-2 bg-green-600 text-white font-semibold mt-4 hover:bg-green-700 transition'
+                            onClick={() => setProductModal(false)}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            }
+            {editProductModal && 
+                <EditProduct 
+                    setEditProductModal={setEditProductModal} 
+                    editSuccessModal={setEditSuccessModal} 
+                    product={selectedProduct} 
+                />
+            }
+            {editSuccessModal &&
+                <div className='success-modal fixed inset-0 flex items-center justify-center bg-black/40 z-50'>
+                    <div className='w-1/3 bg-white h-[18rem] shadow-lg p-6 flex flex-col items-center justify-between'>
+                        <div>
+                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4'/>
+                            <h1 className='text-xl font-semibold text-center text-green-600'>SUCCESS</h1>
+                            <p className='text-center mt-4'>"The product has been updated successfully! You can now view the changes in the system."</p>
+                        </div>
+                        <button 
+                            className='w-full px-4 py-2 bg-green-600 text-white font-semibold mt-4 hover:bg-green-700 transition'
+                            onClick={() => setEditSuccessModal(false)}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
     );
 }

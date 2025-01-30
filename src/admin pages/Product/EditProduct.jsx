@@ -1,39 +1,38 @@
 import { useState, useEffect } from "react";
 
-export default function AddProduct({ setShowAddProduct, setProductModal }) {
+export default function EditProduct({ setEditProductModal, editSuccessModal, product }) {
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
-        genericName: "",
-        brandName: "",
-        dosage: "",
-        description: "",
+        genericName: product.genericName || "",
+        brandName: product.brandName || "",
+        dosage: product.dosage || "",
+        description: product.description || "",
         image: null,
-        price: "",
-        quantity: "",
-        group: "",
-        classification: "OTC",
-        categoryId: ""
+        price: product.price || "",
+        quantity: product.quantity || "",
+        group: product.group || "",
+        classification: product.classification || "OTC",
+        categoryId: product.categoryId || ""
     });
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const response = await fetch("http://localhost:8080/categories");
-                
-                if(response.ok) {
+                if (response.ok) {
                     const data = await response.json();
                     setCategories(data);
                     console.log("Categories:", data);
-                }else{
+                } else {
                     throw new Error("Network response was not ok");
                 }
             } catch (error) {
                 console.error("Error fetching categories:", error);
             }
-        }
+        };
 
         fetchCategories();
-    },[])
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -52,7 +51,7 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const formDataToSend = new FormData();
         formDataToSend.append('genericName', formData.genericName);
         formDataToSend.append('brandName', formData.brandName);
@@ -64,23 +63,27 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
         formDataToSend.append('group', formData.group);
         formDataToSend.append('classification', formData.classification);
         formDataToSend.append('categoryId', formData.categoryId);
-
-        fetch("http://localhost:8080/products/save", {
-            method: "POST",
-            body: formDataToSend
-        })
-        .then(response => {
+    
+        try {
+            const response = await fetch(`http://localhost:8080/products/update/${product.productId}`, {
+                method: "PUT",
+                body: formDataToSend,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+    
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Product saved:", data);
-            setShowAddProduct(false);
-            setProductModal(true);
-        })
-        .catch(error => console.error("Error saving product:", error));
+    
+            const data = await response.json();
+            console.log("Product updated:", data);
+            setEditProductModal(false);
+            editSuccessModal(true);
+        } catch (error) {
+            console.error("Error updating product:", error);
+        }
     };
 
     return (
@@ -88,13 +91,13 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
             <div className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-xl w-full max-w-md relative h-[90%] overflow-y-auto">
                 {/* Close Button */}
                 <button 
-                    onClick={() => setShowAddProduct(false)} 
+                    onClick={() => setEditProductModal(false)} 
                     className="absolute top-4 right-4 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition"
                 >
                     ✕
                 </button>
 
-                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Add Product</h1>
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Edit Product</h1>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
@@ -141,7 +144,14 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Image</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Image</label>
+                        {product.image && (
+                            <img 
+                                src={`http://localhost:8080/images/${product.image}`} 
+                                alt="Current Product" 
+                                className="w-full h-40 object-cover mt-2 mb-4 rounded-lg"
+                            />
+                        )}
                         <input 
                             type="file" 
                             accept="image/*"
@@ -213,7 +223,7 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
                     <div className="flex justify-end gap-2">
                         <button 
                             type="button" 
-                            onClick={() => setShowAddProduct(false)} 
+                            onClick={() => setEditProductModal(false)} 
                             className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition"
                         >
                             Cancel
@@ -222,7 +232,7 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
                             type="submit" 
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                         >
-                            Add Product
+                            Save Changes
                         </button>
                     </div>
                 </form>
