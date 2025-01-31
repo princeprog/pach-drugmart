@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { AiOutlineCalendar } from "react-icons/ai";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
 import { FaCheckCircle } from "react-icons/fa";
 import { MdError } from "react-icons/md";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 import axios from "axios";
 
 function Modal({ message, isOpen, onClose }) {
@@ -38,7 +37,8 @@ function Modal({ message, isOpen, onClose }) {
             </div>
         </div>
     );
-}    
+}
+
 
 export default function Booking() {
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -55,61 +55,165 @@ export default function Booking() {
     });
     const [modalMessage, setModalMessage] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [bookedTimes, setBookedTimes] = useState([]); // New state for booked times
 
     const timeSlots = {
         morning: ["8:00 AM - 9:00 AM", "9:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM"],
         afternoon: ["1:00 PM - 2:00 PM", "2:00 PM - 3:00 PM", "3:00 PM - 4:00 PM", "4:00 PM - 5:00 PM"],
     };
 
+
+
     const handleDateChange = (date) => {
-        setSelectedDate(date);
-        setSelectedSlot(null);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+
+        if (date < today) {
+            setSelectedDate(today);
+            setModalMessage("You cannot book an appointment for past dates.");
+            setIsModalOpen(true);
+        } else {
+            setSelectedDate(date);
+            setSelectedSlot(null);
+            fetchBookedTimes(date);
+        }
+    };
+    
+
+
+    const fetchBookedTimes = async (date) => {
+        try {
+            if (isNaN(date)) {
+                throw new Error('Invalid date');
+            }
+
+            const dateString = date.toISOString().split("T")[0];  // Format 'YYYY-MM-DD'
+
+            const response = await axios.get(`http://localhost:8080/consultation/getBookedTimes/${dateString}`);
+
+            setBookedTimes(response.data);
+        } catch (error) {
+            console.error("Error fetching booked times:", error.message || error);
+        }
     };
 
+
     const handleSlotSelection = (slot) => {
+        if (bookedTimes.includes(formatTime(slot))) {
+            return;
+        }
         setSelectedSlot(slot);
     };
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setContactDetails({ ...contactDetails, [name]: value });
     };
 
+
+    const formatTime = (time) => {
+        const [hour, minute, period] = time.split(/[:\s]/);
+        let hour24 = parseInt(hour, 10);
+        if (period === "PM" && hour24 !== 12) {
+            hour24 += 12;
+        } else if (period === "AM" && hour24 === 12) {
+            hour24 = 0;
+        }
+        return `${hour24.toString().padStart(2, "0")}:${minute}:00`; // Converts "8:00 AM" to "08:00:00"
+    };
+
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const phoneValid = /^[0-9]{11}$/.test(contactDetails.phone);
         const emailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(contactDetails.email);
         const suffixValid = /^(Jr|Sr|II|III|IV|V)$/.test(contactDetails.suffix);
-
+    
+        // Validation checks
         if (!contactDetails.firstName || !contactDetails.lastName || !contactDetails.email || !contactDetails.phone || !selectedSlot) {
             setModalMessage("Please complete all required fields.");
+            setIsModalOpen(true);
         } else if (!phoneValid) {
             setModalMessage("Please enter a valid phone number (11 digits).");
+            setIsModalOpen(true);
         } else if (!emailValid) {
             setModalMessage("Please enter a valid email address.");
+            setIsModalOpen(true);
         } else if (contactDetails.suffix && !suffixValid) {
             setModalMessage("Please enter a valid suffix (e.g., Jr, Sr, II, III).");
+            setIsModalOpen(true);
         } else {
-            setModalMessage(
-                consultationType === "Online"
-                    ? "Your online consultation appointment has successfully been sent. Please wait for email approval and the meeting link."
-                    : "Your onsite consultation appointment has successfully been sent. Please wait for email approval and further details."
-            );
+            const consultationData = {
+                consultationDate: selectedDate.toISOString().split("T")[0], // Format date
+                consultationTime: formatTime(selectedSlot.split(" - ")[0]), // Format time to 24-hour format (HH:mm:ss)
+                googleMeetLink: consultationType === "Online" ? "https://meet.google.com/example" : null,
+                user: {
+                    userId: 1, // This can be dynamic if the user is logged in
+                    firstname: contactDetails.firstName,
+                    lastname: contactDetails.lastName,
+                    email: contactDetails.email,
+                    phone: contactDetails.phone,
+                },
+            };
+    
+            axios
+                .post("http://localhost:8080/consultation/save", consultationData)
+                .then((response) => {
+                    setModalMessage(
+                        consultationType === "Online"
+                            ? "Your online consultation appointment has successfully been sent. Please wait for email approval and the meeting link."
+                            : "Your onsite consultation appointment has successfully been sent. Please wait for email approval and further details."
+                    );
+                    setIsModalOpen(true);
+    
+                    setContactDetails({
+                        firstName: "",
+                        lastName: "",
+                        middleName: "",
+                        suffix: "",
+                        email: "",
+                        phone: "",
+                        message: "",
+                    });
+                    setSelectedSlot(null);
+                    setSelectedDate(new Date());
+                })
+                .catch((error) => {
+                    setModalMessage("There was an error while saving your consultation. Please try again.");
+                    setIsModalOpen(true);
+                });
         }
-        setIsModalOpen(true);
     };
+    
 
     const closeModal = () => {
         setIsModalOpen(false);
         setModalMessage("");
     };
- 
+
+    
+    useEffect(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        setSelectedDate(today);
+        fetchBookedTimes(today);
+    }, []);
+
+
+    useEffect(() => {
+        if (selectedDate) {
+            fetchBookedTimes(selectedDate);
+        }
+    }, [selectedDate]);
+    
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-white pt-2 pb-10">
             {/* Modal */}
-           
-            <Modal FaCheckCircle message={modalMessage} isOpen={isModalOpen} onClose={closeModal} />
- 
+            <Modal message={modalMessage} isOpen={isModalOpen} onClose={closeModal} />
+
             {/* Banner */}
             <div className="w-[95%] h-[35rem] bg-[url('/images/pachparm.jpg')] bg-[position:25%_68%] bg-[length:110%_auto] relative shadow-lg pl-16 rounded-3xl">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#155C9C] via-transparent to-transparent opacity-80 rounded-3xl"></div>
@@ -120,28 +224,28 @@ export default function Booking() {
                     Consultation Today
                 </h1>
             </div>
- 
+
             {/* Booking Form */}
-            <div className="bg-[#e0e0e0] rounded-3xl shadow-[0px_8px_24px_rgba(0,0,0,0.3)] w-[90%] max-w-5xl p-14 space-y-12 mt-12">
-                <h2 className="text-4xl font-bold text-center text-gray-800">Book Your Appointment</h2>
+            <div className="bg-[#e0e0e0] rounded-3xl shadow-[0px_8px_24px_rgba(0,0,0,0.3)] w-[90%] max-w-5xl p-14 space-y-7 mt-12">
+                <h2 className="text-4xl font-bold text-center text-gray-800">Book Your Consultation</h2>
                 <p className="text-center text-lg text-gray-500">
                     Select a date, time slot, and consultation type for your appointment
                 </p>
- 
+
                 {/* Consultation Type Selection */}
-                <div className="flex justify-center gap-6">
+                <div className="flex justify-center gap-10">
                     <button
-                        className={`cursor-pointer px-6 py-3 rounded-lg font-medium transition duration-300 ${
+                        className={`cursor-pointer px-6 py-3 border border-black shadow-lg rounded-lg font-medium transition duration-300 ${
                             consultationType === "Online"
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-200 text-gray-700"
                         }`}
                         onClick={() => setConsultationType("Online")}
-                    >
+                    > 
                         Online Consultation
                     </button>
                     <button
-                        className={`cursor-pointer px-6 py-3 rounded-lg font-medium transition duration-300 ${
+                        className={`cursor-pointer px-6 py-3 border border-black shadow-lg rounded-lg font-medium transition duration-300 ${
                             consultationType === "Onsite"
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-200 text-gray-700"
@@ -151,124 +255,97 @@ export default function Booking() {
                         Onsite Consultation
                     </button>
                 </div>
- 
+
                 {/* Date and Time Selection */}
-                <div className="flex flex-col md:flex-row justify-between gap-5">
-                    {/* Calendar Section */}
-                    <div className="flex flex-col items-center w-full md:w-1/2 space-y-12">
-                        <div className="text-2xl font-semibold text-black-300">Select Date</div>
-                        <div className="bg-gradient-to-b p-8 rounded-2xl w-full">
-                            <Calendar
-                                onChange={handleDateChange}
-                                value={selectedDate}
-                                minDate={new Date()}
-                                className="rounded-lg border-none bg-white shadow-md p-4"
-                            />
-                        </div>
+                <div className="flex flex-col md:flex-row justify-between gap-8">
+                    <div className="w-full md:w-1/2">
+                    <Calendar onChange={handleDateChange} value={selectedDate} className="rounded-3xl shadow-lg"/>
                     </div>
- 
-                    {/* Time Slots Section */}
-                    <div className="flex flex-col w-full md:w-2/3 space-y-6">
-                        <div className="text-2xl font-semibold text-gray-800">Select Time Slot</div>
-                        <div className="grid grid-cols-2 gap-8">
-                            {Object.entries(timeSlots).map(([period, slots]) => (
-                                <div key={period} className="flex flex-col w-full space-y-6">
-                                    <h3 className="text-lg font-semibold text-gray-600 capitalize">
-                                        {period} Slots
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {slots.map((slot, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={() => handleSlotSelection(slot)}
-                                                className={`cursor-pointer w-full py-5 text-lg rounded-2xl font-medium transition duration-300 shadow-lg border border-black-300 ${
-                                                    selectedSlot === slot
-                                                        ? "bg-blue-600 text-white"
-                                                        : "bg-gradient-to-b from-white to-blue-50 text-gray-700 hover:bg-blue-100"
-                                                }`}
-                                            >
-                                                {slot}
-                                            </button>
-                                        ))}
+
+                    {/* Time Slots */}
+                    <div className="w-full md:w-1/2 flex flex-col gap-6">
+                        <h3 className="text-xl font-semibold text-Black-700">Available Time Slots</h3>
+                        <div className="space-y-4">
+                            {["morning", "afternoon"].map((period) => (
+                                <div key={period}>
+                                    <h4 className="text-lg font-medium text-Black-700">{period === "morning" ? "Morning:" : "Afternoon:"}</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {timeSlots[period].map((slot) => {
+                                            const isBooked = bookedTimes.includes(formatTime(slot));
+                                            return (
+                                                <button
+                                                    key={slot}
+                                                    className={`w-full py-2 px-4 rounded-lg border-2 transition duration-300 ${
+                                                        selectedSlot === slot
+                                                            ? "bg-blue-600 text-white border-blue-600 cursor-pointer"
+                                                            : isBooked
+                                                            ? "bg-red-600 text-white cursor-not-allowed"
+                                                            : "bg-white text-gray-700 hover:bg-gray-100 cursor-pointer"
+                                                    }`}
+                                                    disabled={isBooked}
+                                                    onClick={() => handleSlotSelection(slot)}
+                                                    title={isBooked ? "Booked" : "Available"} // Tooltip on hover
+                                                >
+                                                    {slot}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
- 
+
                 {/* Contact Form */}
-                <div className="flex flex-col space-y-5">
-                    <h2 className="text-2xl text-center font-semibold text-gray-800">Contact Details</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <input
-                            type="text"
-                            name="firstName"
-                            placeholder="*First Name"
-                            value={contactDetails.firstName}
-                            onChange={handleInputChange}
-                            className="p-4 border rounded-lg w-full"
-                        />
-                        <input
-                            type="text"
-                            name="lastName"
-                            placeholder="*Last Name"
-                            value={contactDetails.lastName}
-                            onChange={handleInputChange}
-                            className="p-4 border rounded-lg w-full"
-                        />
-                        <input
-                            type="text"
-                            name="middleName"
-                            placeholder="Middle Name"
-                            value={contactDetails.middleName}
-                            onChange={handleInputChange}
-                            className="p-4 border rounded-lg w-full"
-                        />
-                       <input
-                            type="text"
-                            name="suffix"
-                            placeholder="Suffix (Jr, Sr, etc.)"
-                            value={contactDetails.suffix}
-                            onChange={handleInputChange}
-                            className="p-4 border rounded-lg w-full"
-                            pattern="^(Jr|Sr|II|III|IV|V)$"
-                            title="Please enter a valid suffix (e.g., Jr, Sr, II, III)"
-                        />
-                        <input
-                            type="email"
-                            name="email"
-                            placeholder="*Email"
-                            value={contactDetails.email}
-                            onChange={handleInputChange}
-                            className="p-4 border rounded-lg w-full"
-                        />
-                        <input
-                            type="text"
-                            name="phone"
-                            placeholder="*Phone Number"
-                            value={contactDetails.phone}
-                            onChange={handleInputChange}
-                            className="p-4 border rounded-lg w-full"
-                            pattern="[0-9]{11}"
-                            inputMode="numeric"
-                            title="Please enter a valid phone number"
-                        />
-                    </div>
+                <div className="flex flex-col gap-4">
+                <h3 className="flex justify-center text-xl font-semibold text-Black-700">Contact Details: </h3>
+                    <input
+                        type="text"
+                        name="firstName"
+                        value={contactDetails.firstName}
+                        onChange={handleInputChange}
+                        placeholder="First Name"
+                        className="px-6 py-3 border border-black-300 rounded-lg"
+                    />
+                    <input
+                        type="text"
+                        name="lastName"
+                        value={contactDetails.lastName}
+                        onChange={handleInputChange}
+                        placeholder="Last Name"
+                        className="px-6 py-3 border border-black-300 rounded-lg"
+                    />
+                    <input
+                        type="email"
+                        name="email"
+                        value={contactDetails.email}
+                        onChange={handleInputChange}
+                        placeholder="Email"
+                        className="px-6 py-3 border border-black-300 rounded-lg"
+                    />
+                    <input
+                        type="text"
+                        name="phone"
+                        value={contactDetails.phone}
+                        onChange={handleInputChange}
+                        placeholder="Phone (11 digits)"
+                        className="px-6 py-3 border border-black-300 rounded-lg"
+                    />
                     <textarea
                         name="message"
-                        placeholder="Message/Consultation Details"
                         value={contactDetails.message}
                         onChange={handleInputChange}
-                        className="p-4 border rounded-lg w-full"
-                        rows="4"
-                    ></textarea>
+                        placeholder="Message (optional)"
+                        className="px-6 py-3 border border-black-300 rounded-lg"
+                    />
                 </div>
- 
-                <div className="flex justify-center mt-6">
+
+                {/* Submit Button */}
+                <div className="flex justify-center">
                     <button
                         onClick={handleSubmit}
-                        className="align-center cursor-pointer bg-blue-600 text-white py-4 rounded-lg w-80 text-lg font-medium transition duration-300 hover:bg-blue-700"
+                        className="cursor-pointer mt-8 bg-blue-600 text-white py-3 px-8 rounded-xl transition duration-300 hover:bg-blue-700"
                     >
                         Book Appointment
                     </button>
