@@ -10,6 +10,10 @@ import About from "./pages/About/About";
 import Booking from "./pages/Booking/Booking";
 import Drug from "./pages/Drug/Drug";
 import DrugDetails from "./pages/Drug/DrugDetails";
+import Dashboard from "./admin pages/Dashboard/Dashboard";
+import Schedule from "./admin pages/Schedule/Schedule";
+import Messages from "./admin pages/Messages/Messages";
+import UserManagement from "./admin pages/User Management/UserManagement";
 
 
 export default function Routess() {
@@ -27,8 +31,12 @@ export default function Routess() {
             </Route>
             <Route path="/admin/login" element={<AdminLogin/>}/>
             <Route path="/admin" element={<Sidebar/>}>
-                <Route index element={<Navigate to="products" />} />
+                <Route index element={<Navigate to="dashboard" />} />
                 <Route path="products" element={<Product/>}/>
+                <Route path="dashboard" element={<Dashboard/>}></Route>
+                <Route path="schedule" element={<Schedule/>}></Route>
+                <Route path="messages" element={<Messages/>}></Route>
+                <Route path="user-management" element={<UserManagement/>}></Route>
             </Route>
         </Routes>
     )

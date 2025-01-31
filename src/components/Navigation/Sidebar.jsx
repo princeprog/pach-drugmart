@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { CiEdit } from "react-icons/ci";
 import { AiOutlineDashboard } from "react-icons/ai";
 import { RiProductHuntLine } from "react-icons/ri";
@@ -10,9 +10,21 @@ import { IoIosSettings } from "react-icons/io";
 
 export default function Sidebar() {
     const [activeItem, setActiveItem] = useState("Dashboard");
+    const navigate = useNavigate();
 
     const handleItemClick = (item) => {
         setActiveItem(item);
+        if(item === "Dashboard"){
+            navigate("dashboard");
+        } else if(item === "Products"){
+            navigate("products");
+        }else if(item === "Schedule"){
+            navigate("schedule");
+        }else if(item === "Messages"){
+            navigate("messages");
+        }else if(item === "User Management"){
+            navigate("user-management");
+        }
     };
 
     const getItemClass = (item) => {
@@ -33,8 +45,8 @@ export default function Sidebar() {
                 <div className="w-full">
                     <div className={getItemClass("Dashboard")} onClick={() => handleItemClick("Dashboard")}><AiOutlineDashboard className="mr-2 text-lg" />Dashboard</div>
                     <div className={getItemClass("Products")} onClick={() => handleItemClick("Products")}><RiProductHuntLine className="mr-2 text-lg" />Products</div>
-                    <div className={getItemClass("Consultations")} onClick={() => handleItemClick("Consultations")}><RiCalendarScheduleLine className="mr-2 text-lg" />Schedules</div>
-                    <div className={getItemClass("Orders & Payments")} onClick={() => handleItemClick("Orders & Payments")}><BiSolidPurchaseTag className="mr-2 text-lg" />Messages</div>
+                    <div className={getItemClass("Consultations")} onClick={() => handleItemClick("Schedule")}><RiCalendarScheduleLine className="mr-2 text-lg" />Schedules</div>
+                    <div className={getItemClass("Orders & Payments")} onClick={() => handleItemClick("Messages")}><BiSolidPurchaseTag className="mr-2 text-lg" />Messages</div>
                     <div className={getItemClass("User Management")} onClick={() => handleItemClick("User Management")}><FaUser className="mr-2 text-lg" />User Management</div>
                     <div className={getItemClass("Settings")} onClick={() => handleItemClick("Settings")}><IoIosSettings className="mr-2 text-lg" />Settings</div>
                 </div>
