@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/',  // If you want to explicitly define the root
+  base: '/home/', 
   plugins: [
     react(),
     tailwindcss(),
