@@ -11,17 +11,80 @@ export default function Product() {
     const [editSuccessModal, setEditSuccessModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
 
+    const[deleteProductModal, setDeleteProductModal] = useState(false);
+
     useEffect(() => {
         fetch('http://localhost:8080/products/getall')
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
             .then(data => setProducts(data))
             .catch(err => console.log(err));
-    }, [productModal, editSuccessModal]);
+    }, []);
+
+    useEffect(() => {
+        fetch('http://localhost:8080/products/getall')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
+            .then(data => setProducts(data))
+            .catch(err => console.log(err));
+    },[productModal])
+
+    useEffect(() => {
+        fetch('http://localhost:8080/products/getall')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
+            .then(data => setProducts(data))
+            .catch(err => console.log(err));
+    },[editSuccessModal])
+
+    useEffect(() => {
+        fetch('http://localhost:8080/products/getall')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
+            .then(data => setProducts(data))
+            .catch(err => console.log(err));
+    },[deleteProductModal])
 
     const handleEditClick = (product) => {
         setSelectedProduct(product);
         setEditProductModal(true);
     };
+
+    const handleDeleteClick = (productId) => {
+        console.log(productId);
+        fetch(`http://localhost:8080/products/delete/${productId}`, {
+            method: 'DELETE'
+        })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.text(); 
+            })
+            .then(data => {
+                console.log('Delete response:', data);
+                setProducts(prevState => prevState.filter(product => product.productId !== productId));
+                console.log('Product deleted successfully');
+                setDeleteProductModal(true);
+            })
+            .catch(err => console.log(err));
+    }
 
     return (
         <div className="product w-full py-6 px-10 bg-white shadow-lg rounded-lg">
@@ -66,7 +129,9 @@ export default function Product() {
                                     >
                                         Edit
                                     </button>
-                                    <button className="px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition">Delete</button>
+                                    <button className="px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition"
+                                        onClick={()=>handleDeleteClick(product.productId)}
+                                    >Delete</button>
                                 </td>
                             </tr>
                         ))}
@@ -110,6 +175,23 @@ export default function Product() {
                         <button 
                             className='w-full px-4 py-2 bg-green-600 text-white font-semibold mt-4 hover:bg-green-700 transition'
                             onClick={() => setEditSuccessModal(false)}
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            }
+            {deleteProductModal &&
+                <div className='success-modal fixed inset-0 flex items-center justify-center bg-black/40 z-50'>
+                    <div className='w-1/3 bg-white h-[18rem] shadow-lg p-6 flex flex-col items-center justify-between'>
+                        <div>
+                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4'/>
+                            <h1 className='text-xl font-semibold text-center text-green-600'>SUCCESS</h1>
+                            <p className='text-center mt-4'>"Data deleted successfully"</p>
+                        </div>
+                        <button 
+                            className='w-full px-4 py-2 bg-green-600 text-white font-semibold mt-4 hover:bg-green-700 transition'
+                            onClick={() => setDeleteProductModal(false)}
                         >
                             Close
                         </button>

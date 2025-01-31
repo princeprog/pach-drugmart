@@ -49,7 +49,9 @@ export default function NavBar() {
                     </div>
                 </div>
                 <div className="px-16 flex py-4 space-x-8 font-semibold border-[#155C9C] text-[#181C14] bg-[#FFFFFF] text-sm">
-                    <p className="cursor-pointer hover:text-[#32DBBE] transition-colors duration-300 ease-in-out">SHOP</p>
+                    <p className="cursor-pointer hover:text-[#32DBBE] transition-colors duration-300 ease-in-out"
+                        onClick={()=>navigate("/drug")}
+                    >DRUG</p>
                     <p className="cursor-pointer hover:text-[#32DBBE] transition-colors duration-300 ease-in-out">HEALTH & ADVICE</p>
                     <p className="cursor-pointer hover:text-[#32DBBE] transition-colors duration-300 ease-in-out"
                         onClick={()=>navigate("/about")}

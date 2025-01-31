@@ -43,6 +43,14 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
         }));
     };
 
+    const handleCategoryChange = (e) => {
+        const { value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            categoryId: value
+        }));
+    };
+
     const handleImageChange = (e) => {
         setFormData(prevState => ({
             ...prevState,
@@ -187,7 +195,7 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
                         <select 
                             name="categoryId"
                             value={formData.categoryId}
-                            onChange={handleChange}
+                            onChange={handleCategoryChange}
                             className="w-full p-2 mt-1 border rounded-lg bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring focus:ring-blue-500 outline-none"
                         >
                             <option value="">Select Category</option>

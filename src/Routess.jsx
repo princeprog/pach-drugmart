@@ -8,6 +8,8 @@ import Sidebar from "./components/Navigation/Sidebar";
 import Product from "./admin pages/Product/Product";
 import About from "./pages/About/About";
 import Booking from "./pages/Booking/Booking";
+import Drug from "./pages/Drug/Drug";
+import DrugDetails from "./pages/Drug/DrugDetails";
 
 
 export default function Routess() {
@@ -18,8 +20,10 @@ export default function Routess() {
                 <Route path="home" element={<Home/>}/>
                 <Route path="register" element={<Register/>}/>
                 <Route path="login" element={<Login/>}/>
+                <Route path="drug" element={<Drug/>}/>
                 <Route path="about" element={<About/>}/>
                 <Route path="booking" element={<Booking/>}/>
+                <Route path="drug/details/:productId" element={<DrugDetails/>}/>
             </Route>
             <Route path="/admin/login" element={<AdminLogin/>}/>
             <Route path="/admin" element={<Sidebar/>}>

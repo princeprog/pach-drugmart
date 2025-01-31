@@ -7,12 +7,12 @@ export default function EditProduct({ setEditProductModal, editSuccessModal, pro
         brandName: product.brandName || "",
         dosage: product.dosage || "",
         description: product.description || "",
-        image: null,
+        image: product.image || null,
         price: product.price || "",
         quantity: product.quantity || "",
         group: product.group || "",
         classification: product.classification || "OTC",
-        categoryId: product.categoryId || ""
+        categoryId: product.categories ? product.categories.categoryId : ""
     });
 
     useEffect(() => {
@@ -22,7 +22,6 @@ export default function EditProduct({ setEditProductModal, editSuccessModal, pro
                 if (response.ok) {
                     const data = await response.json();
                     setCategories(data);
-                    console.log("Categories:", data);
                 } else {
                     throw new Error("Network response was not ok");
                 }
@@ -51,7 +50,7 @@ export default function EditProduct({ setEditProductModal, editSuccessModal, pro
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         const formDataToSend = new FormData();
         formDataToSend.append('genericName', formData.genericName);
         formDataToSend.append('brandName', formData.brandName);
@@ -65,25 +64,22 @@ export default function EditProduct({ setEditProductModal, editSuccessModal, pro
         formDataToSend.append('group', formData.group);
         formDataToSend.append('classification', formData.classification);
         formDataToSend.append('categoryId', formData.categoryId);
-    
-        // Log the form data to debug
+
         for (let [key, value] of formDataToSend.entries()) {
             console.log(`${key}: ${value}`);
         }
-    
+
         try {
             const response = await fetch(`http://localhost:8080/products/update/${product.productId}`, {
                 method: "PUT",
                 body: formDataToSend,
-                headers: {
-                    'Accept': 'application/json'
-                }
             });
-    
+
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                const errorText = await response.text();
+                throw new Error(`Network response was not ok: ${errorText}`);
             }
-    
+
             const data = await response.json();
             console.log("Product updated:", data);
             setEditProductModal(false);
@@ -199,7 +195,6 @@ export default function EditProduct({ setEditProductModal, editSuccessModal, pro
                             onChange={handleChange}
                             className="w-full p-2 mt-1 border rounded-lg bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:ring focus:ring-blue-500 outline-none"
                         >
-                            <option value="">Select Category</option>
                             {categories.map(category => (
                                 <option key={category.categoryId} value={category.categoryId}>
                                     {category.name}
