@@ -85,7 +85,8 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-            <section className="px-16 py-8 bg-[#FFFFFF] h-fit">
+            <section className="px-16 py-8 bg-[#FFFFFF] h-fit flex flex-col items-center">
+                <div className="w-fit rounded-2xl px-4 py-1 mb-2 bg-[#32DBBE] text-white font-montserrat">Contact Form</div>
                 <div className="mt-8 p-4 flex w-full">
                     <div className="w-[50%] p-4 flex flex-col">
                         <h1 className="text-5xl font-bold text-[#155C9C]">Support and Inquiries</h1>
