@@ -1,1 +1,27 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dongle&family=Lexend:wght@100..900&display=swap');
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add custom font family */
+.font-roboto {
+    font-family: 'Lato', sans-serif;
+    font-weight: 600;
+}
+
+.font-montserrat {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+}
+
+.font-montserrat2 {
+    font-family: 'Montserrat', sans-serif;
+}
+
+.font-roboto2 {
+    font-family: 'Lato', sans-serif;
+}
