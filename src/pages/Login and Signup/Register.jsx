@@ -104,7 +104,7 @@ export default function Register() {
     };
 
     return (
-        <div className="flex items-start justify-center pt-10">
+        <div className="flex items-start justify-center pt-15">
             <Modal message={modalMessage} isOpen={isModalOpen} onClose={closeModal} />
 
             <div className="flex w-[90%] max-w-4xl bg-gray-50 shadow-lg rounded-lg overflow-hidden">

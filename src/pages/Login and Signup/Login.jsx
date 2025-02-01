@@ -71,9 +71,14 @@ export default function Login() {
             if (response.status === 200) {
                 setModalMessage("Login successful! Redirecting...");
                 setIsModalOpen(true);
-                setTimeout(() => {
-                    navigate("/home");
-                }, 2000);
+
+                localStorage.setItem('userEmail', formData.email);
+                
+                window.location.href = "/home";
+
+                // setTimeout(() => {
+                //     navigate("/home");
+                // }, 2000);
             } else {
                 setModalMessage("Invalid email or password.");
                 setIsModalOpen(true);
@@ -91,7 +96,7 @@ export default function Login() {
     };
 
     return (
-        <div className="flex items-start justify-center pt-10">
+        <div className="flex items-start justify-center pt-30">
             <Modal message={modalMessage} isOpen={isModalOpen} onClose={closeModal} />
 
             <div className="flex w-[90%] max-w-4xl bg-white shadow-lg rounded-lg overflow-hidden">

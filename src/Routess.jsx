@@ -14,7 +14,7 @@ import Dashboard from "./admin pages/Dashboard/Dashboard";
 import Schedule from "./admin pages/Schedule/Schedule";
 import Messages from "./admin pages/Messages/Messages";
 import UserManagement from "./admin pages/User Management/UserManagement";
-
+import Profile from "./pages/Profile/Profile"
 
 export default function Routess() {
     return (
@@ -28,6 +28,7 @@ export default function Routess() {
                 <Route path="about" element={<About/>}/>
                 <Route path="booking" element={<Booking/>}/>
                 <Route path="drug/details/:productId" element={<DrugDetails/>}/>
+                <Route path="Profile" element={<Profile/>}/>
             </Route>
             <Route path="/admin/login" element={<AdminLogin/>}/>
             <Route path="/admin" element={<Sidebar/>}>
