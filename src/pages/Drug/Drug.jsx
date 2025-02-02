@@ -8,6 +8,7 @@ export default function Drug() {
         return storedRecentlyViewed ? JSON.parse(storedRecentlyViewed) : [];
     });
     const [letter, setLetter] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
 
     const fetchDrugsByLetter = async (letter) => {
@@ -24,9 +25,24 @@ export default function Drug() {
         }
     };
 
+    const fetchDrugsBySearchTerm = async (searchTerm) => {
+        try {
+            const response = await fetch(`http://localhost:8080/products/search?searchTerm=${searchTerm}`);
+            if (response.ok) {
+                const data = await response.json();
+                setDrugs(data);
+            } else {
+                throw new Error("Network response was not ok");
+            }
+        } catch (error) {
+            console.error("Error fetching drugs:", error);
+        }
+    };
+
     const handleLetterClick = (letter) => {
         fetchDrugsByLetter(letter);
         setLetter(letter);
+        setSearchQuery(''); // Clear the search query
     };
 
     const handleDrugClick = (drug) => {
@@ -38,13 +54,36 @@ export default function Drug() {
         });
     };
 
+    const handleSearchChange = (event) => {
+        const searchTerm = event.target.value;
+        setSearchQuery(searchTerm);
+        fetchDrugsBySearchTerm(searchTerm);
+        setLetter('')
+    };
+
+    const highlightText = (text, highlight) => {
+        if (!highlight.trim()) {
+            return text;
+        }
+        const regex = new RegExp(`(${highlight})`, 'gi');
+        return text.split(regex).map((part, index) =>
+            regex.test(part) ? <span key={index} className="bg-yellow-300">{part}</span> : part
+        );
+    };
+
     return (
         <div className="">
             <div className="border-b-2 flex flex-col md:flex-row justify-between items-center px-4 md:px-32 py-4 bg-[#EBD3F8] border-black/20">
                 <div className="w-full flex flex-col justify-between h-auto md:h-[12rem]">
                     <h1 className="text-2xl md:text-3xl font-bold">Drug Information</h1>
                     <div>
-                        <input type="text" placeholder="Search by drug, brandname" className="border-1 w-full md:w-[50%] h-[3rem] rounded-lg mt-4 px-4 border-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by drug, brandname"
+                            className="border-1 w-full md:w-[50%] h-[3rem] rounded-lg mt-4 px-4 border-gray-400"
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                        />
                         <div className="flex flex-wrap justify-around items-center mt-4 w-full md:w-[60%] font-bold text-[#155C9C] text-sm">
                             {'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => (
                                 <p key={letter} className="hover:underline cursor-pointer" onClick={() => handleLetterClick(letter)}>{letter}</p>
@@ -70,12 +109,13 @@ export default function Drug() {
             </div>
             <div className="px-4 md:px-32 py-8">
                 <h1 className="text-lg md:text-xl font-medium">Drugs</h1>
+                {searchQuery && <h2 className='text-xl md:text-2xl font-medium'>Search results for: "{searchQuery}"</h2>}
                 {drugs.length > 0 ? (
                     <ul>
                         <h1 className='text-2xl md:text-3xl font-bold'>{letter}</h1>
                         {drugs.map(drug => (
                             <li key={drug.productId} className="cursor-pointer border-b-1 py-4 border-black/30 w-full md:w-[40%] hover:text-[#32DBBE]" onClick={() => handleDrugClick(drug)}>
-                                {drug.genericName} ({drug.brandName})
+                                {highlightText(drug.genericName, searchQuery)} ({highlightText(drug.brandName, searchQuery)})
                             </li>
                         ))}
                     </ul>

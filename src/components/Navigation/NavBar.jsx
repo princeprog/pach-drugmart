@@ -39,7 +39,7 @@ export default function NavBar() {
                 <div className="nav flex justify-between items-center border-b-1 border-gray-300 px-4 md:px-16 bg-[#FFFFFF]">
                     <div className="flex items-center w-full md:w-[50%] space-x-4">
                         <img src="/images/Wordmark.2.png" alt="Pach" className="cursor-pointer w-[5rem]" onClick={()=>navigate('/home')}/>
-                        <input type="text" placeholder="Search for products" className="border-1 h-[3rem] w-full px-4 py-2 rounded-3xl"/>
+                        <input type="text" placeholder="Search for products" className="border-1 h-[3rem] w-full px-4 py-2 rounded-3xl border-gray-400"/>
                     </div>
                     
                     <div className="flex items-center space-x-4 text-[#181C14] transition-colors duration-300 ease-in-out">
