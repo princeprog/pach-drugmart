@@ -15,6 +15,7 @@ import Schedule from "./admin pages/Schedule/Schedule";
 import Messages from "./admin pages/Messages/Messages";
 import UserManagement from "./admin pages/User Management/UserManagement";
 import Profile from "./pages/Profile/Profile"
+import AdminBookings from "./admin pages/adminBookings/adminBookings";
 
 export default function Routess() {
     return (
@@ -38,6 +39,7 @@ export default function Routess() {
                 <Route path="schedule" element={<Schedule/>}></Route>
                 <Route path="messages" element={<Messages/>}></Route>
                 <Route path="user-management" element={<UserManagement/>}></Route>
+                <Route path="adminBookings" element={<AdminBookings/>}></Route>
             </Route>
         </Routes>
     )
