@@ -22,9 +22,10 @@ export default function AddProduct({ setShowAddProduct, setProductModal }) {
                 
                 if(response.ok) {
                     const data = await response.json();
-                    setCategories(data);
-                    console.log("Categories:", data);
-                }else{
+                    const sortedData = data.sort((a, b) => a.name.localeCompare(b.name));
+                    setCategories(sortedData);
+                    console.log("Categories:", sortedData);
+                } else {
                     throw new Error("Network response was not ok");
                 }
             } catch (error) {

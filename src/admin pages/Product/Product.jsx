@@ -10,8 +10,7 @@ export default function Product() {
     const [editProductModal, setEditProductModal] = useState(false);
     const [editSuccessModal, setEditSuccessModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-
-    const[deleteProductModal, setDeleteProductModal] = useState(false);
+    const [deleteProductModal, setDeleteProductModal] = useState(false);
 
     useEffect(() => {
         fetch('http://localhost:8080/products/getall')
@@ -35,7 +34,7 @@ export default function Product() {
             })
             .then(data => setProducts(data))
             .catch(err => console.log(err));
-    },[productModal])
+    }, [productModal]);
 
     useEffect(() => {
         fetch('http://localhost:8080/products/getall')
@@ -47,7 +46,7 @@ export default function Product() {
             })
             .then(data => setProducts(data))
             .catch(err => console.log(err));
-    },[editSuccessModal])
+    }, [editSuccessModal]);
 
     useEffect(() => {
         fetch('http://localhost:8080/products/getall')
@@ -59,7 +58,7 @@ export default function Product() {
             })
             .then(data => setProducts(data))
             .catch(err => console.log(err));
-    },[deleteProductModal])
+    }, [deleteProductModal]);
 
     const handleEditClick = (product) => {
         setSelectedProduct(product);
@@ -75,7 +74,7 @@ export default function Product() {
                 if (!res.ok) {
                     throw new Error('Network response was not ok');
                 }
-                return res.text(); 
+                return res.text();
             })
             .then(data => {
                 console.log('Delete response:', data);
@@ -84,13 +83,13 @@ export default function Product() {
                 setDeleteProductModal(true);
             })
             .catch(err => console.log(err));
-    }
+    };
 
     return (
-        <div className="product w-full py-6 px-10 bg-white shadow-lg rounded-lg">
+        <div className="product w-full py-6 px-10 bg-white shadow-lg rounded-lg flex flex-col flex-grow h-screen overflow-y-auto">
             <div className="flex items-center justify-between pb-4 mb-4 border-b border-gray-200">
                 <h1 className="text-3xl font-semibold text-gray-800">Manage Products</h1>
-                <button 
+                <button
                     className="px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
                     onClick={() => setShowAddProduct(true)}
                 >
@@ -98,7 +97,7 @@ export default function Product() {
                 </button>
             </div>
 
-            <div className="w-full overflow-hidden rounded-lg shadow-md">
+            <div className="w-full rounded-lg shadow-md h-full">
                 <table className="w-full border-collapse bg-white">
                     <thead>
                         <tr className="bg-gray-100 text-gray-700 text-sm uppercase text-center">
@@ -115,7 +114,7 @@ export default function Product() {
                     <tbody>
                         {products.map(product => (
                             <tr key={product.productId} className="text-gray-800 text-sm text-center hover:bg-gray-50 transition">
-                                <td className="px-4 py-3 border-b ">{product.genericName}</td>
+                                <td className="px-4 py-3 border-b">{product.genericName}</td>
                                 <td className="px-4 py-3 border-b">{product.brandName}</td>
                                 <td className="px-4 py-3 border-b">{product.dosage}</td>
                                 <td className="px-4 py-3 border-b">₱{product.price.toFixed(2)}</td>
@@ -123,15 +122,18 @@ export default function Product() {
                                 <td className="px-4 py-3 border-b">{product.categories.name}</td>
                                 <td className="px-4 py-3 border-b">{product.classification}</td>
                                 <td className="px-4 py-3 border-b flex justify-center space-x-3">
-                                    <button 
+                                    <button
                                         className="px-4 py-2 rounded-md bg-green-600 text-white font-medium hover:bg-green-700 transition"
                                         onClick={() => handleEditClick(product)}
                                     >
                                         Edit
                                     </button>
-                                    <button className="px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition"
-                                        onClick={()=>handleDeleteClick(product.productId)}
-                                    >Delete</button>
+                                    <button
+                                        className="px-4 py-2 rounded-md bg-red-600 text-white font-medium hover:bg-red-700 transition"
+                                        onClick={() => handleDeleteClick(product.productId)}
+                                    >
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
                         ))}
@@ -139,16 +141,16 @@ export default function Product() {
                 </table>
             </div>
 
-            {showAddProduct && <AddProduct setShowAddProduct={setShowAddProduct} setProductModal={setProductModal}/>}
+            {showAddProduct && <AddProduct setShowAddProduct={setShowAddProduct} setProductModal={setProductModal} />}
             {productModal &&
                 <div className='success-modal fixed inset-0 flex items-center justify-center bg-black/40 z-50'>
                     <div className='w-1/3 bg-white h-[18rem] shadow-lg p-6 flex flex-col items-center justify-between'>
                         <div>
-                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4'/>
+                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4' />
                             <h1 className='text-xl font-semibold text-center text-green-600'>SUCCESS</h1>
                             <p className='text-center mt-4'>"The data has been added successfully! You can now view it in the system."</p>
                         </div>
-                        <button 
+                        <button
                             className='w-full px-4 py-2 bg-green-600 text-white font-semibold mt-4 hover:bg-green-700 transition'
                             onClick={() => setProductModal(false)}
                         >
@@ -157,22 +159,22 @@ export default function Product() {
                     </div>
                 </div>
             }
-            {editProductModal && 
-                <EditProduct 
-                    setEditProductModal={setEditProductModal} 
-                    editSuccessModal={setEditSuccessModal} 
-                    product={selectedProduct} 
+            {editProductModal &&
+                <EditProduct
+                    setEditProductModal={setEditProductModal}
+                    editSuccessModal={setEditSuccessModal}
+                    product={selectedProduct}
                 />
             }
             {editSuccessModal &&
                 <div className='success-modal fixed inset-0 flex items-center justify-center bg-black/40 z-50'>
                     <div className='w-1/3 bg-white h-[18rem] shadow-lg p-6 flex flex-col items-center justify-between'>
                         <div>
-                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4'/>
+                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4' />
                             <h1 className='text-xl font-semibold text-center text-green-600'>SUCCESS</h1>
                             <p className='text-center mt-4'>"The product has been updated successfully! You can now view the changes in the system."</p>
                         </div>
-                        <button 
+                        <button
                             className='w-full px-4 py-2 bg-green-600 text-white font-semibold mt-4 hover:bg-green-700 transition'
                             onClick={() => setEditSuccessModal(false)}
                         >
@@ -185,11 +187,11 @@ export default function Product() {
                 <div className='success-modal fixed inset-0 flex items-center justify-center bg-black/40 z-50'>
                     <div className='w-1/3 bg-white h-[18rem] shadow-lg p-6 flex flex-col items-center justify-between'>
                         <div>
-                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4'/>
+                            <FaCheckCircle className='text-5xl text-green-600 mx-auto mb-4' />
                             <h1 className='text-xl font-semibold text-center text-green-600'>SUCCESS</h1>
                             <p className='text-center mt-4'>"Data deleted successfully"</p>
                         </div>
-                        <button 
+                        <button
                             className='w-full px-4 py-2 bg-green-600 text-white font-semibold mt-4 hover:bg-green-700 transition'
                             onClick={() => setDeleteProductModal(false)}
                         >

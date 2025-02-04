@@ -76,6 +76,9 @@ export default function Drug() {
             <div className="border-b-2 flex flex-col md:flex-row justify-between items-center px-4 md:px-32 py-4 bg-[#EBD3F8] border-black/20">
                 <div className="w-full flex flex-col justify-between h-auto md:h-[12rem]">
                     <h1 className="text-2xl md:text-3xl font-bold">Drug Information</h1>
+                    <p className='font-roboto text-[#155C9C] cursor-pointer hover:underline'
+                        onClick={() => navigate('/drug/view')}
+                    >View Drugs</p>
                     <div>
                         <input
                             type="text"

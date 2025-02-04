@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-
 export default function DrugDetails() {
     const { productId } = useParams();
     const [formData, setFormData] = useState({
@@ -19,6 +18,12 @@ export default function DrugDetails() {
     const [imageUrl, setImageUrl] = useState("");
 
     const navigate = useNavigate();
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const user = localStorage.getItem("userEmail");
+        setIsLoggedIn(!!user);
+    }, []);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -67,10 +72,21 @@ export default function DrugDetails() {
                             <h1 className="text-2xl font-bold text-gray-800 mb-2">{formData.description}</h1>
                             <p className="text-gray-600 mb-2"><span className="font-semibold">Brand Name:</span> {formData.brandName}</p>
                             <div>
-                                <p className="text-gray-600 mb-2">Php <span className="font-semibold underline cursor-pointer">View price</span></p>
+                                {isLoggedIn ? (
+                                    <p className="text-gray-600 mb-2"><span className="font-semibold">Price:</span> ₱{Number(formData.price).toFixed(2)}</p>
+                                ) : (
+                                    <p className="text-gray-600 mb-2"><span className="font-semibold">Price:</span> <span className="hover:underline cursor-pointer"
+                                        onClick={() => navigate("/login")}
+                                    >View price</span></p>
+                                )}
                             </div>
+                            {formData.quantity > 0 ? (
+                                <p className="text-green-600 text-sm">In stock</p>
+                            ) : (
+                                <p className="text-red-600 text-sm">Out of stock</p>
+                            )}
                         </div>
-                        <button className="border-1 cursor-pointer w-[12rem] py-2 rounded-3xl mb-8 text-white font-medium bg-[#155C9C]">Order</button>
+                        <button className="border-1 cursor-pointer w-[12rem] py-2 rounded-3xl mb-8 text-white font-medium bg-[#155C9C] mt-4">Order</button>
                     </div>
                 </div>
             </div>
