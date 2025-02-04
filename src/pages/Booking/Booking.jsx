@@ -259,7 +259,7 @@ export default function Booking() {
                 {/* Date and Time Selection */}
                 <div className="flex flex-col md:flex-row justify-between gap-8">
                     <div className="w-full md:w-1/2">
-                    <Calendar onChange={handleDateChange} value={selectedDate} className="rounded-3xl shadow-lg"/>
+                    <Calendar onChange={handleDateChange} value={selectedDate} className="rounded-3xl p-5 shadow-lg"/>
                     </div>
 
                     {/* Time Slots */}
