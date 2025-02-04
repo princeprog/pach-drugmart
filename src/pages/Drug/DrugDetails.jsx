@@ -15,6 +15,8 @@ export default function DrugDetails() {
         classification: "OTC",
         categoryId: ""
     });
+
+    const [quantity, setQuantity] = useState(1);
     const [imageUrl, setImageUrl] = useState("");
 
     const navigate = useNavigate();
@@ -60,34 +62,43 @@ export default function DrugDetails() {
     }, [productId]);
 
     return (
-        <div className="container mx-auto p-6">
-            <button className="text-blue-600 hover:underline mb-4" onClick={() => navigate(-1)}>Return</button>
-            <div className="bg-[#F5F5F5] shadow-md rounded-lg p-6">
-                <div className="flex flex-col md:flex-row">
-                    <div className="md:w-1/6">
-                        {imageUrl && <img src={imageUrl} alt={formData.genericName} className="rounded-lg shadow-md" />}
+        <div className="container mx-auto p-6 flex ">
+            <div className="w-[25%]">
+                {imageUrl && <img src={imageUrl} alt={formData.brandName} className="w-[100%] mx-auto" />}
+            </div>
+            <div className=" w-1/2 p-4">
+                <p className="text-gray-500 text-xl">{formData.genericName}</p>
+                <h1 className="text-3xl font-montserrat">{formData.description}</h1>
+                {isLoggedIn ? (
+                    <p className="mt-8 font-roboto2">Selling for <span className="font-montserrat text-2xl">₱{Number(formData.price).toFixed(2)}</span></p>
+                ):(
+                    <p className="underline cursor-pointer font-montserrat text-gray-500 mt-4"
+                        onClick={() => navigate("/login")}
+                    >View price</p>
+                )}
+                {formData.quantity > 0 ? (
+                    <p className="mt-4">In stock</p>
+                ):(
+                    <p>Out of stock</p>
+                )}
+                <div className="flex items-center">
+                    <div className="flex items-center border w-[6rem] px-2 py-2 rounded border-gray-300 justify-between">
+                        <p className="cursor-pointer text-3xl"
+                            onClick={()=> setQuantity(quantity - 1)}
+                        >-</p>
+                        <p className="mx-4">{quantity}</p>
+                        <p className="cursor-pointer text-2xl"
+                            onClick={()=> setQuantity(quantity + 1)}
+                        >+</p>
                     </div>
-                    <div className="md:w-2/3 md:pl-6 mt-4 md:mt-0 flex flex-col justify-between">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-800 mb-2">{formData.description}</h1>
-                            <p className="text-gray-600 mb-2"><span className="font-semibold">Brand Name:</span> {formData.brandName}</p>
-                            <div>
-                                {isLoggedIn ? (
-                                    <p className="text-gray-600 mb-2"><span className="font-semibold">Price:</span> ₱{Number(formData.price).toFixed(2)}</p>
-                                ) : (
-                                    <p className="text-gray-600 mb-2"><span className="font-semibold">Price:</span> <span className="hover:underline cursor-pointer"
-                                        onClick={() => navigate("/login")}
-                                    >View price</span></p>
-                                )}
-                            </div>
-                            {formData.quantity > 0 ? (
-                                <p className="text-green-600 text-sm">In stock</p>
-                            ) : (
-                                <p className="text-red-600 text-sm">Out of stock</p>
-                            )}
-                        </div>
-                        <button className="border-1 cursor-pointer w-[12rem] py-2 rounded-3xl mb-8 text-white font-medium bg-[#155C9C] mt-4">Order</button>
-                    </div>
+                    <button className="border w-[75%] ml-4 py-2 text-white bg-[#155C9C] flex-grow rounded text-lg cursor-pointer"
+                        onClick={() => {
+                            if (!isLoggedIn) {
+                                navigate("/login");
+                                return;
+                            }
+                        }}
+                    >Add to cart</button>
                 </div>
             </div>
         </div>

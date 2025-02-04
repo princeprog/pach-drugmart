@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function ViewDrugs() {
-    const [drugs, setDrugs] = useState([]);
-    const [filteredDrugs, setFilteredDrugs] = useState([]);
-    const [filter, setFilter] = useState("all");
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [filters, setFilters] = useState({
+        prescription: false,
+        otc: false,
+    });
 
     useEffect(() => {
         const user = localStorage.getItem("userEmail");
@@ -14,75 +17,98 @@ export default function ViewDrugs() {
     }, []);
 
     useEffect(() => {
-        const fetchDrugs = async () => {
+        const fetchProducts = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/products/getall`);
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(data);
-                    setDrugs(data);
-                    setFilteredDrugs(data);
-                } else {
-                    throw new Error("Network response was not ok");
-                }
+                const response = await fetch("http://localhost:8080/products/getall", {
+                    method: "GET",
+                });
+                const data = await response.json();
+                console.log(data);
+                setProducts(data);
+                setFilteredProducts(data);
             } catch (error) {
-                console.error("Error fetching drugs:", error);
+                console.log(error);
             }
         };
-        fetchDrugs();
+        fetchProducts();
     }, []);
 
-    const handleFilterChange = (e) => {
-        const selectedFilter = e.target.value;
-        setFilter(selectedFilter);
+    useEffect(() => {
+        filterProducts();
+    }, [filters]);
 
-        if (selectedFilter === "all") {
-            setFilteredDrugs(drugs);
-        } else {
-            const filtered = drugs.filter(drug => drug.classification.toLowerCase() === selectedFilter);
-            setFilteredDrugs(filtered);
+    const handleFilterChange = (e) => {
+        const { name, checked } = e.target;
+        setFilters((prevFilters) => ({
+            ...prevFilters,
+            [name]: checked,
+        }));
+    };
+
+    const filterProducts = () => {
+        let filtered = products;
+
+        if (filters.prescription && !filters.otc) {
+            filtered = products.filter((product) => product.classification.toLowerCase() === "rx");
+        } else if (!filters.prescription && filters.otc) {
+            filtered = products.filter((product) => product.classification.toLowerCase() === "otc");
+        } else if (filters.prescription && filters.otc) {
+            filtered = products.filter(
+                (product) => product.classification.toLowerCase() === "rx" || product.classification.toLowerCase() === "otc"
+            );
         }
+
+        setFilteredProducts(filtered);
     };
 
     return (
-        <div>
-            <div className="border-1 mx-16 py-2 mt-4 px-4 border-gray-400">
-                <select
-                    className="border-1 w-1/4 h-10 border-gray-400 p-2"
-                    value={filter}
-                    onChange={handleFilterChange}
-                >
-                    <option value="all">All</option>
-                    <option value="otc">Over-the-Counter</option>
-                    <option value="rx">Prescription</option>
-                </select>
-            </div>
-            <div className="grid grid-cols-4 gap-3 mx-16 mt-4 border-gray-300 content-center justify-items-center">
-                {filteredDrugs.map((drug) => (
-                    <div key={drug.productId} className="border flex flex-col items-center w-[80%] border-gray-300 p-4">
-                        <img
-                            src={`http://localhost:8080/products/getimage/${drug.productId}`}
-                            alt={drug.description}
-                            className="w-full mb-4"
+        <div className="container flex">
+            <div className="sidebar w-[20%] border-r-1 px-4 py-2 border-gray-300 h-screen">
+                <div className="border-b-1 pb-4 border-gray-300">
+                    <h1 className="font-roboto">Drug Classification</h1>
+                    <div className="flex items-center mt-4">
+                        <input
+                            type="checkbox"
+                            className="mr-2 w-4 h-4 opacity-50"
+                            name="prescription"
+                            checked={filters.prescription}
+                            onChange={handleFilterChange}
                         />
-                        <h4 className="font-roboto text-gray-500 hover:text-[#32DBBE] cursor-pointer"
-                            onClick={() => navigate(`/drug/details/${drug.productId}`)}
-                        >
-                            {drug.description}
-                        </h4>
+                        <label className="font-roboto2">Prescription (Rx)</label>
+                    </div>
+                    <div className="flex items-center">
+                        <input
+                            type="checkbox"
+                            className="mr-2 w-4 h-4 opacity-50"
+                            name="otc"
+                            checked={filters.otc}
+                            onChange={handleFilterChange}
+                        />
+                        <label className="font-roboto2">OTC / Over-The-Counter</label>
+                    </div>
+                </div>
+            </div>
+            <div className="grid grid-cols-4 gap-4 w-[80%] p-4">
+                {filteredProducts.map((product) => (
+                    <div key={product.productId} className="border border-gray-200 flex flex-col">
+                        <img
+                            src={`http://localhost:8080/products/getimage/${product.productId}`}
+                            alt={product.productName}
+                            className="object-cover w-[100%]"
+                        />
+                        <h1 className="ml-4 font-roboto text-gray-500 hover:text-[#155C9C] cursor-pointer"
+                            onClick={() => navigate(`/drug/details/${product.productId}`)}
+                        >{product.description}</h1>
+                        {product.quantity > 0 ? (
+                            <p className="text-sm text-green-500 ml-4">In stock</p>
+                        ) : (
+                            <p className="text-sm text-red-500">Out of stock</p>
+                        )}
                         {isLoggedIn ? (
-                            <p>Php <span className="font-montserrat2 text-gray-500">{drug.price.toFixed(2)}</span></p>
+                            <p className="ml-4 mt-4 font-roboto "><span>₱</span>{Number(product.price).toFixed(2)}</p>
                         ) : (
-                            <p>Php <span className="font-montserrat2 hover:underline cursor-pointer text-gray-500"
-                                onClick={()=>navigate("/login")}
-                            >View price</span></p>
+                            <p className="ml-4 mt-8 font-roboto underline text-gray-500 cursor-pointer underline">View price</p>
                         )}
-                        {drug.quantity > 0 ? (
-                            <p className="text-green-500 text-sm">In Stock</p>
-                        ) : (
-                            <p className="text-red-500 text-sm">Out of Stock</p>
-                        )}
-                        <button className="border px-5 py-1 my-2 rounded-lg text-white bg-[#155C9C] cursor-pointer">Buy Now</button>
                     </div>
                 ))}
             </div>
