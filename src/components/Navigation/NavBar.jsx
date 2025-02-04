@@ -64,7 +64,6 @@ export default function NavBar() {
                                 <BiUser className="text-2xl mr-1"/>
                                 <div>
                                     <h2 className="font-medium">Login / Signup</h2>
-                                    {/* <p className="text-xs">Login / Signup</p> */}
                                 </div>
                             </div>
                         )}
