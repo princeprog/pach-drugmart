@@ -6,11 +6,14 @@ import { BsTelephone } from "react-icons/bs";
 import { MdOutlineLocationOn } from "react-icons/md";
 import { useState, useEffect } from "react";
 import { BiUser, BiLogOut } from "react-icons/bi";
+import { IoCartOutline } from "react-icons/io5";
+
 
 export default function NavBar() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    
 
     useEffect(() => {
         // Check if user is logged in (based on localStorage)
@@ -23,6 +26,8 @@ export default function NavBar() {
         setIsLoggedIn(false);
         navigate("/login");
     };
+
+    
 
     return (
         <div className="nav-bar text-[#181C14]">
@@ -43,9 +48,11 @@ export default function NavBar() {
                     </div>
                     
                     <div className="flex items-center space-x-4 text-[#181C14] transition-colors duration-300 ease-in-out">
-                        <div className="flex items-center mr-12">
-                            <MdOutlineLocationOn className="text-2xl"/>
-                            <h1 className="font-medium"> Yellow Bell, Colon, City of Naga, Cebu</h1>
+                        <div className="flex items-center mr-12 cursor-pointer hover:text-[#32DBBE]"
+                            onClick={() => navigate("/cart")}
+                        >
+                            <IoCartOutline className="text-2xl"/>
+                            <h2 className="font-medium ml-1">Cart</h2>
                         </div>
 
                         {isLoggedIn ? (
