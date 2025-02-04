@@ -8,26 +8,43 @@ import { useState, useEffect } from "react";
 import { BiUser, BiLogOut } from "react-icons/bi";
 import { IoCartOutline } from "react-icons/io5";
 
-
 export default function NavBar() {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    
+    const [count, setCount] = useState(0);
+    const [user, setUser] = useState("");
 
     useEffect(() => {
         // Check if user is logged in (based on localStorage)
-        const user = localStorage.getItem("userEmail");
-        setIsLoggedIn(!!user);
+        const userEmail = localStorage.getItem("userEmail");
+        setIsLoggedIn(!!userEmail);
+        setUser(userEmail);
     }, []);
+
+    useEffect(() => {
+        if (user) {
+            const fetchUser = async () => {
+                try {
+                    const response = await fetch(`http://localhost:8080/cart/count?email=${user}`, {
+                        method: "GET",
+                    });
+                    const data = await response.json();
+                    console.log(data);
+                    setCount(data);
+                } catch (error) {
+                    console.log(error);
+                }
+            };
+            fetchUser();
+        }
+    }, [user]);
 
     const handleLogout = () => {
         localStorage.removeItem("userEmail");
         setIsLoggedIn(false);
         navigate("/login");
     };
-
-    
 
     return (
         <div className="nav-bar text-[#181C14]">
@@ -52,7 +69,7 @@ export default function NavBar() {
                             onClick={() => navigate("/cart")}
                         >
                             <IoCartOutline className="text-2xl"/>
-                            <h2 className="font-medium ml-1">Cart</h2>
+                            <h2 className="font-medium ml-1 flex">Cart{isLoggedIn && (<p>({count})</p>)}</h2>
                         </div>
 
                         {isLoggedIn ? (

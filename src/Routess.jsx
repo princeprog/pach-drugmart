@@ -17,6 +17,7 @@ import UserManagement from "./admin pages/User Management/UserManagement";
 import Profile from "./pages/Profile/Profile"
 import AdminBookings from "./admin pages/adminBookings/adminBookings";
 import ViewDrugs from "./pages/Drug/ViewDrugs";
+import Cart from "./pages/Cart/Cart";
 
 export default function Routess() {
     return (
@@ -32,6 +33,7 @@ export default function Routess() {
                 <Route path="drug/details/:productId" element={<DrugDetails/>}/>
                 <Route path="Profile" element={<Profile/>}/>
                 <Route path="drug/view" element={<ViewDrugs/>}/>
+                <Route path="/cart" element={<Cart/>}/>
             </Route>
             <Route path="/admin/login" element={<AdminLogin/>}/>
             <Route path="/admin" element={<Sidebar/>}>
