@@ -39,7 +39,6 @@ function Modal({ message, isOpen, onClose }) {
     );
 }
 
-
 export default function Booking() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [selectedSlot, setSelectedSlot] = useState(null);
@@ -55,62 +54,59 @@ export default function Booking() {
     });
     const [modalMessage, setModalMessage] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [bookedTimes, setBookedTimes] = useState([]); // New state for booked times
+    const [bookedTimes, setBookedTimes] = useState([]);
 
     const timeSlots = {
         morning: ["8:00 AM - 9:00 AM", "9:00 AM - 10:00 AM", "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM"],
         afternoon: ["1:00 PM - 2:00 PM", "2:00 PM - 3:00 PM", "3:00 PM - 4:00 PM", "4:00 PM - 5:00 PM"],
     };
 
-
-
     const handleDateChange = (date) => {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); 
-
-        if (date < today) {
+        today.setHours(0, 0, 0, 0);
+    
+        const localSelectedDate = new Date(date);
+    
+        if (localSelectedDate < today) {
             setSelectedDate(today);
             setModalMessage("You cannot book an appointment for past dates.");
             setIsModalOpen(true);
         } else {
-            setSelectedDate(date);
+            setSelectedDate(localSelectedDate);
             setSelectedSlot(null);
-            fetchBookedTimes(date);
+            fetchBookedTimes(localSelectedDate);
         }
     };
-    
-
 
     const fetchBookedTimes = async (date) => {
         try {
-            if (isNaN(date)) {
-                throw new Error('Invalid date');
-            }
-
-            const dateString = date.toISOString().split("T")[0];  // Format 'YYYY-MM-DD'
+            const dateString = date.toLocaleDateString("en-CA"); 
+            console.log("Sending date to backend:", dateString);
 
             const response = await axios.get(`http://localhost:8080/consultation/getBookedTimes/${dateString}`);
-
             setBookedTimes(response.data);
         } catch (error) {
             console.error("Error fetching booked times:", error.message || error);
         }
     };
 
-
     const handleSlotSelection = (slot) => {
-        if (bookedTimes.includes(formatTime(slot))) {
+        const formattedSlot = formatTime(slot); 
+
+        const isBooked = bookedTimes.includes(formattedSlot);
+        if (isBooked) {
+            setModalMessage("This time slot is already booked.");
+            setIsModalOpen(true);
             return;
         }
+        
         setSelectedSlot(slot);
     };
-
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setContactDetails({ ...contactDetails, [name]: value });
     };
-
 
     const formatTime = (time) => {
         const [hour, minute, period] = time.split(/[:\s]/);
@@ -120,36 +116,59 @@ export default function Booking() {
         } else if (period === "AM" && hour24 === 12) {
             hour24 = 0;
         }
-        return `${hour24.toString().padStart(2, "0")}:${minute}:00`; // Converts "8:00 AM" to "08:00:00"
+        return `${hour24.toString().padStart(2, "0")}:${minute}:00`;
     };
-
 
     const handleSubmit = (e) => {
         e.preventDefault();
+    
         const phoneValid = /^[0-9]{11}$/.test(contactDetails.phone);
         const emailValid = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(contactDetails.email);
         const suffixValid = /^(Jr|Sr|II|III|IV|V)$/.test(contactDetails.suffix);
     
-        // Validation checks
         if (!contactDetails.firstName || !contactDetails.lastName || !contactDetails.email || !contactDetails.phone || !selectedSlot) {
             setModalMessage("Please complete all required fields.");
             setIsModalOpen(true);
+            return;
         } else if (!phoneValid) {
             setModalMessage("Please enter a valid phone number (11 digits).");
             setIsModalOpen(true);
+            return;
         } else if (!emailValid) {
             setModalMessage("Please enter a valid email address.");
             setIsModalOpen(true);
+            return;
         } else if (contactDetails.suffix && !suffixValid) {
             setModalMessage("Please enter a valid suffix (e.g., Jr, Sr, II, III).");
             setIsModalOpen(true);
+            return;
         } else {
+            const localDate = new Date(selectedDate);
+            const timezoneOffset = localDate.getTimezoneOffset();
+            localDate.setMinutes(localDate.getMinutes() - timezoneOffset);
+    
+            const dateString = localDate.toLocaleDateString("en-CA");
+    
+            // Format the selected time slot to 24-hour format for comparison
+            const formattedSlot = formatTime(selectedSlot.split(" - ")[0]);
+    
+            // Check if the selected date and time slot already exists in bookedTimes
+            const isSlotBooked = bookedTimes.some(
+                (bookedTime) => bookedTime.date === dateString && bookedTime.time === formattedSlot
+            );
+    
+            if (isSlotBooked) {
+                setModalMessage("This date and time slot has already been booked. Please choose a different time.");
+                setIsModalOpen(true);
+                return;
+            }
+    
             const consultationData = {
-                consultationDate: selectedDate.toISOString().split("T")[0], // Format date
-                consultationTime: formatTime(selectedSlot.split(" - ")[0]), // Format time to 24-hour format (HH:mm:ss)
-                googleMeetLink: consultationType === "Online" ? "https://meet.google.com/example" : null,
+                consultationDate: dateString,
+                consultationTime: formattedSlot,
+                googleMeetLink: consultationType === null,
                 user: {
-                    userId: 1, // This can be dynamic if the user is logged in
+                    userId: 1,
                     firstname: contactDetails.firstName,
                     lastname: contactDetails.lastName,
                     email: contactDetails.email,
@@ -160,6 +179,7 @@ export default function Booking() {
             axios
                 .post("http://localhost:8080/consultation/save", consultationData)
                 .then((response) => {
+                    // After successful booking, refresh the booked times for today's date
                     setModalMessage(
                         consultationType === "Online"
                             ? "Your online consultation appointment has successfully been sent. Please wait for email approval and the meeting link."
@@ -167,6 +187,18 @@ export default function Booking() {
                     );
                     setIsModalOpen(true);
     
+                    // Optionally, re-fetch booked times for today's date (just to be sure)
+                    const todayString = new Date().toLocaleDateString("en-CA");
+                    axios
+                        .get(`http://localhost:8080/consultation/getBookedTimes/${todayString}`)
+                        .then((response) => {
+                            setBookedTimes(response.data); // Refresh booked times for today's date
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching booked times for today:", error);
+                        });
+    
+                    // Reset the form and force the selected date to today
                     setContactDetails({
                         firstName: "",
                         lastName: "",
@@ -177,7 +209,9 @@ export default function Booking() {
                         message: "",
                     });
                     setSelectedSlot(null);
-                    setSelectedDate(new Date());
+    
+                    // Force reset selectedDate to today's date to ensure refreshing the availability
+                    setSelectedDate(new Date()); // Reset to today's date
                 })
                 .catch((error) => {
                     setModalMessage("There was an error while saving your consultation. Please try again.");
@@ -186,28 +220,20 @@ export default function Booking() {
         }
     };
     
-
+    
     const closeModal = () => {
         setIsModalOpen(false);
         setModalMessage("");
     };
 
-    
     useEffect(() => {
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0); 
 
-        setSelectedDate(today);
-        fetchBookedTimes(today);
+        const localToday = new Date(today);
+        setSelectedDate(localToday);  
+        fetchBookedTimes(localToday);
     }, []);
-
-
-    useEffect(() => {
-        if (selectedDate) {
-            fetchBookedTimes(selectedDate);
-        }
-    }, [selectedDate]);
-    
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-white pt-2 pb-10">
@@ -329,26 +355,25 @@ export default function Booking() {
                         name="phone"
                         value={contactDetails.phone}
                         onChange={handleInputChange}
-                        placeholder="Phone (11 digits)"
+                        placeholder="Phone Number"
                         className="px-6 py-3 border border-black-300 rounded-lg"
                     />
-                    <textarea
+                    <input
+                        type="text"
                         name="message"
                         value={contactDetails.message}
                         onChange={handleInputChange}
-                        placeholder="Message (optional)"
+                        placeholder="Message"
                         className="px-6 py-3 border border-black-300 rounded-lg"
                     />
-                </div>
-
-                {/* Submit Button */}
-                <div className="flex justify-center">
-                    <button
-                        onClick={handleSubmit}
-                        className="cursor-pointer mt-8 bg-blue-600 text-white py-3 px-8 rounded-xl transition duration-300 hover:bg-blue-700"
-                    >
-                        Book Appointment
-                    </button>
+                    <div className="flex justify-center items-center h-full">
+                        <button
+                            onClick={handleSubmit}
+                            className="w-[10] aka bg-blue-600 text-white py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700"
+                        >
+                            Book Consultation
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

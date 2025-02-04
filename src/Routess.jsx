@@ -41,7 +41,7 @@ export default function Routess() {
                 <Route path="schedule" element={<Schedule/>}></Route>
                 <Route path="messages" element={<Messages/>}></Route>
                 <Route path="user-management" element={<UserManagement/>}></Route>
-                <Route path="adminBookings" element={<AdminBookings/>}></Route>
+                <Route path="adminbookings" element={<AdminBookings/>}></Route>
             </Route>
         </Routes>
     )

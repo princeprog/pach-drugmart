@@ -36,7 +36,6 @@ export default function AdminBookings() {
     const applyFilters = (date, query) => {
         let filtered = bookings;
 
-
         if (date) {
             filtered = filtered.filter((booking) => {
                 const bookingDate = new Date(booking.consultationDate);
@@ -44,7 +43,6 @@ export default function AdminBookings() {
                 return bookingDate.toISOString().split("T")[0] === filterDate.toISOString().split("T")[0];
             });
         }
-
 
         if (query) {
             filtered = filtered.filter((booking) => {
@@ -60,6 +58,13 @@ export default function AdminBookings() {
         setDateFilter("");
         setSearchQuery("");
         setFilteredBookings(bookings);
+    };
+
+    const formatTime = (time) => {
+        const [hours, minutes] = time.split(":");
+        const date = new Date();
+        date.setHours(hours, minutes);
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
     };
 
     return (
@@ -118,15 +123,10 @@ export default function AdminBookings() {
                             <tbody>
                                 {filteredBookings.length > 0 ? (
                                     filteredBookings.map((booking, index) => (
-                                        <tr
-                                            key={booking.id}
-                                            className={`${
-                                                index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                                            } hover:bg-gray-200 transition-colors duration-200`}
-                                        >
+                                        <tr key={booking.id} className={`${index % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-gray-200 transition-colors duration-200`}>
                                             <td className="px-6 py-4 border-b border-gray-200">{`${booking.user.firstname} ${booking.user.lastname}`}</td>
                                             <td className="px-6 py-4 border-b border-gray-200">{new Date(booking.consultationDate).toLocaleDateString()}</td>
-                                            <td className="px-6 py-4 border-b border-gray-200">{booking.consultationTime}</td>
+                                            <td className="px-6 py-4 border-b border-gray-200">{formatTime(booking.consultationTime)}</td>
                                             <td className="px-6 py-4 border-b border-gray-200">{booking.googleMeetLink ? "Online" : "Onsite"}</td>
                                         </tr>
                                     ))
@@ -142,4 +142,4 @@ export default function AdminBookings() {
             </div>
         </div>
     );
-}
+} 
